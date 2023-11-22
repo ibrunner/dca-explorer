@@ -1,26 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import CryptoChart from './CryptoChart';
 
-function App() {
+const App: React.FC = () => {
+  // Sample data structure, replace with your actual data
+  const [data, setData] = useState<{ date: Date; price: number }[]>([
+    { date: new Date('2023-01-01'), price: 10000 },
+    // Add more data points as needed
+  ]);
+
+  const [forecastingLine, setForecastingLine] = useState<number[] | null>(null);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Crypto Investment Chart</h1>
+      <CryptoChart data={data} forecastingLine={forecastingLine} />
+      {/* Add controls or other components here */}
     </div>
   );
-}
+};
 
 export default App;
