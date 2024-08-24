@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import {State, Action} from "./DataReducer";
+import {State, Action} from "./util/dataReducer";
 
 const AppContext = createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
     state: {
