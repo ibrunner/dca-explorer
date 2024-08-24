@@ -1,0 +1,15 @@
+import React, { createContext, useContext } from "react";
+import {State, Action} from "./DataReducer";
+
+const AppContext = createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
+    state: {
+      contributions: "",
+      timePeriod: "",
+    },
+    dispatch: () => {},
+  });
+  
+  // Custom hook to access the context
+  export const useAppContext = () => useContext(AppContext);
+
+  export default AppContext;
