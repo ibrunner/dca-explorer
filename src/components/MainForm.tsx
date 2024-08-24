@@ -4,10 +4,16 @@ import { useAppContext } from "../AppContext";
 const MainForm: React.FC = () => {
   const { state, dispatch } = useAppContext();
 
-  const handleContributionsChange = (
+  const handleStartingAssetTotalChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    dispatch({ type: "SET_CONTRIBUTIONS", payload: event.target.value });
+    dispatch({ type: "SET_STARTING_ASSET_TOTAL", payload: Number(event.target.value) });
+  };
+  
+  const handleContributionChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch({ type: "SET_CONTRIBUTION", payload: event.target.value });
   };
 
   const handleTimePeriodChange = (
@@ -43,6 +49,14 @@ const MainForm: React.FC = () => {
   return (
     <>
       <div>
+      <label>
+        Starting Asset Total:
+        <input
+          type="number"
+          value={state.startingAssetTotal}
+          onChange={handleStartingAssetTotalChange}
+        />
+      </label>
         <label>
           Start Price:
           <input
@@ -82,12 +96,12 @@ const MainForm: React.FC = () => {
         <button type="submit">Submit</button>
       </div>
       <div>
-        <label htmlFor="contributions">Contributions:</label>
+        <label htmlFor="contribution">Contribution:</label>
         <input
           type="text"
-          id="contributions"
-          value={state.contributions}
-          onChange={handleContributionsChange}
+          id="contribution"
+          value={state.contribution}
+          onChange={handleContributionChange}
         />
 
         <label htmlFor="timePeriod">Time Period:</label>

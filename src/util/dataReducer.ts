@@ -1,36 +1,39 @@
 import { Projection } from "./useProjections";
 
 export interface State {
-  contributions: string;
+  contribution: number;
   timePeriod: string;
   projections: Projection[];
   startPrice: number;
   endPrice: number;
   startDate: Date;
   endDate: Date;
+  startingAssetTotal: number;
 }
 
-type SetContributionsAction = { type: "SET_CONTRIBUTIONS"; payload: string };
+type SetContributionAction = { type: "SET_CONTRIBUTION"; payload: string };
 type SetTimePeriodAction = { type: "SET_TIME_PERIOD"; payload: string };
 type SetProjectionsAction = { type: "SET_PROJECTIONS"; payload: Projection[] };
 type SetStartPriceAction = { type: "SET_START_PRICE"; payload: number };
 type SetEndPriceAction = { type: "SET_END_PRICE"; payload: number };
 type SetStartDateAction = { type: "SET_START_DATE"; payload: Date };
 type SetEndDateAction = { type: "SET_END_DATE"; payload: Date };
+type SetStartingAssetTotalAction = { type: "SET_STARTING_ASSET_TOTAL"; payload: number }; // New action type
 
 export type Action =
-  | SetContributionsAction
+  | SetContributionAction
   | SetTimePeriodAction
   | SetProjectionsAction
   | SetStartPriceAction
   | SetEndPriceAction
   | SetStartDateAction
-  | SetEndDateAction;
+  | SetEndDateAction
+  | SetStartingAssetTotalAction;
 
 // Action creators
-export const setContributions = (contributions: string): SetContributionsAction => ({
-  type: "SET_CONTRIBUTIONS",
-  payload: contributions,
+export const setContribution = (contribution: string): SetContributionAction => ({
+  type: "SET_CONTRIBUTION",
+  payload: contribution,
 });
 
 export const setTimePeriod = (timePeriod: string): SetTimePeriodAction => ({
@@ -63,11 +66,16 @@ export const setEndDate = (date: Date): SetEndDateAction => ({
   payload: date,
 });
 
+export const setStartingAssetTotal = (total: number): SetStartingAssetTotalAction => ({
+  type: "SET_STARTING_ASSET_TOTAL",
+  payload: total,
+});
+
 // Update the reducer
 const dataReducer = (state: State, action: Action) => {
   switch (action.type) {
-    case "SET_CONTRIBUTIONS":
-      return { ...state, contributions: action.payload };
+    case "SET_CONTRIBUTION":
+      return { ...state, contribution: action.payload };
     case "SET_TIME_PERIOD":
       return { ...state, timePeriod: action.payload };
     case "SET_PROJECTIONS":
@@ -80,6 +88,8 @@ const dataReducer = (state: State, action: Action) => {
       return { ...state, startDate: action.payload };
     case "SET_END_DATE":
       return { ...state, endDate: action.payload };
+    case "SET_STARTING_ASSET_TOTAL":
+      return { ...state, startingAssetTotal: action.payload };
     default:
       return state;
   }

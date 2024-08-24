@@ -3,7 +3,7 @@ import {State, Action} from "./util/dataReducer";
 
 const AppContext = createContext<{ state: State; dispatch: React.Dispatch<Action> }>({
     state: {
-      contributions: "",
+      contribution: "",
       timePeriod: "",
     },
     dispatch: () => {},

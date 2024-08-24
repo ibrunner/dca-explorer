@@ -11,13 +11,14 @@ function App(): JSX.Element {
   endDate.setFullYear(endDate.getFullYear() + 1);
 
   const [state, dispatch] = useReducer(dataReducer, {
-    contributions: "",
+    contribution: 1000,
+    startingAssetTotal: 1,
     timePeriod: "",
     projections: [],
     startDate,
     endDate,
-    startPrice: 0,
-    endPrice: 500
+    startPrice: 67800,
+    endPrice: 123000,
   });
 
   
