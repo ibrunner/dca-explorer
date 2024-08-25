@@ -30,8 +30,11 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
         range: [margin.left, width - margin.right],
     });
 
+    const minBalance = Math.min(0, ...projections.map((d) => d.balance));
+    const maxBalance = max(projections, (d) => d.balance) || 0;
+    
     const yScale = scaleLinear({
-        domain: [0, max(projections, (d) => d.balance) || 0],
+        domain: [Math.max(0, minBalance), maxBalance],
         range: [height - margin.bottom, margin.top],
         nice: true,
     });
