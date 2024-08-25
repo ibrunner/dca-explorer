@@ -3,6 +3,7 @@ import dataReducer from "./util/dataReducer";
 import MainForm from "./components/MainForm";
 import AppContext from "./AppContext";
 import ProjectionsTable from "./components/ProjectionsTable";
+import ProjectionsChart from "./components/ProjectionsChart";
 
 function App(): JSX.Element {
   const startDate: Date = new Date();
@@ -25,8 +26,9 @@ function App(): JSX.Element {
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
-      <ProjectionsTable {...state} />
       <MainForm />
+      <ProjectionsChart {...state} width={500} height={500} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}/>
+      <ProjectionsTable {...state} />
     </AppContext.Provider>
   );
 }
