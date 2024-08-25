@@ -27,7 +27,7 @@ function App(): JSX.Element {
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       <MainForm />
-      <ProjectionsChart {...state} width={500} height={500} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}/>
+      <ProjectionsChart {...state} width={500} height={500} margin={{ top: 50, right: 50, bottom: 50, left: 50 }}/>
       <ProjectionsTable {...state} />
     </AppContext.Provider>
   );
