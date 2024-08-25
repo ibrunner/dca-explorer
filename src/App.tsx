@@ -4,31 +4,53 @@ import MainForm from "./components/MainForm";
 import AppContext from "./AppContext";
 import ProjectionsTable from "./components/ProjectionsTable";
 import ProjectionsChart from "./components/ProjectionsChart";
+import useProjections from "./util/useProjections";
 
 function App(): JSX.Element {
-  const startDate: Date = new Date();
-  const endDate: Date = new Date();
+  const startDateInit: Date = new Date();
+  const endDateInit: Date = new Date();
 
-  endDate.setFullYear(endDate.getFullYear() + 1);
+  endDateInit.setFullYear(endDateInit.getFullYear() + 1);
 
   const [state, dispatch] = useReducer(dataReducer, {
     contribution: 1000,
     startingAssetTotal: 1,
     timePeriod: "",
     projections: [],
-    startDate,
-    endDate,
+    startDate: startDateInit,
+    endDate: endDateInit,
     startPrice: 67800,
     endPrice: 123000,
   });
 
-  
+  const {
+    startPrice,
+    endPrice,
+    startDate,
+    endDate,
+    contribution,
+    startingAssetTotal,
+  } = state;
+
+  const projections = useProjections(
+    startPrice,
+    endPrice,
+    startDate,
+    endDate,
+    contribution,
+    startingAssetTotal
+  );
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       <MainForm />
-      <ProjectionsChart {...state} width={500} height={500} margin={{ top: 50, right: 50, bottom: 50, left: 50 }}/>
-      <ProjectionsTable {...state} />
+      <ProjectionsChart
+        {...state}
+        width={500}
+        height={500}
+        projections={projections}
+      />
+      <ProjectionsTable {...state} projections={projections} />
     </AppContext.Provider>
   );
 }

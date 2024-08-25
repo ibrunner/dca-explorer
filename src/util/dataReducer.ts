@@ -18,7 +18,10 @@ type SetStartPriceAction = { type: "SET_START_PRICE"; payload: number };
 type SetEndPriceAction = { type: "SET_END_PRICE"; payload: number };
 type SetStartDateAction = { type: "SET_START_DATE"; payload: Date };
 type SetEndDateAction = { type: "SET_END_DATE"; payload: Date };
-type SetStartingAssetTotalAction = { type: "SET_STARTING_ASSET_TOTAL"; payload: number }; // New action type
+type SetStartingAssetTotalAction = {
+  type: "SET_STARTING_ASSET_TOTAL";
+  payload: number;
+}; // New action type
 
 export type Action =
   | SetContributionAction
@@ -31,7 +34,9 @@ export type Action =
   | SetStartingAssetTotalAction;
 
 // Action creators
-export const setContribution = (contribution: string): SetContributionAction => ({
+export const setContribution = (
+  contribution: string
+): SetContributionAction => ({
   type: "SET_CONTRIBUTION",
   payload: contribution,
 });
@@ -41,7 +46,9 @@ export const setTimePeriod = (timePeriod: string): SetTimePeriodAction => ({
   payload: timePeriod,
 });
 
-export const setProjections = (projections: Projection[]): SetProjectionsAction => ({
+export const setProjections = (
+  projections: Projection[]
+): SetProjectionsAction => ({
   type: "SET_PROJECTIONS",
   payload: projections,
 });
@@ -66,7 +73,9 @@ export const setEndDate = (date: Date): SetEndDateAction => ({
   payload: date,
 });
 
-export const setStartingAssetTotal = (total: number): SetStartingAssetTotalAction => ({
+export const setStartingAssetTotal = (
+  total: number
+): SetStartingAssetTotalAction => ({
   type: "SET_STARTING_ASSET_TOTAL",
   payload: total,
 });

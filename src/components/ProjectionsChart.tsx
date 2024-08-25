@@ -1,89 +1,98 @@
-import React from 'react';
-import { Group } from '@visx/group';
-import { LinePath } from '@visx/shape';
-import { scaleLinear, scaleTime } from '@visx/scale';
-import { AxisBottom, AxisLeft } from '@visx/axis';
-import { extent, max } from 'd3-array';
-import moment from 'moment';
-import { Projection } from '../util/useProjections';
+import React from "react";
+import { Group } from "@visx/group";
+import { LinePath } from "@visx/shape";
+import { scaleTime, scaleLinear } from "@visx/scale";
+import { AxisLeft, AxisBottom } from "@visx/axis";
+import { Projection } from "../util/useProjections";
 import { useAppContext } from "../AppContext";
 
 interface ProjectionsChartProps {
-    projections: Projection[];
-    width: number;
-    height: number;
-    margin?: { top: number; right: number; bottom: number; left: number };
+  projections: Projection[];
+  width: number;
+  height: number;
+  margin?: { top: number; right: number; bottom: number; left: number };
 }
 
 const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
-    projections,
-    width,
-    height,
-    margin = { top: 10, right: 10, bottom: 10, left: 10 },
+  width = 800,
+  height = 400,
+  projections,
 }) => {
-    const { state } = useAppContext();
-    const { startPrice, endPrice, startDate, endDate, contribution, startingAssetTotal } = state;
+  const { state } = useAppContext();
+  const { startDate, endDate } = state;
 
-    // Define the x and y scales
-    const xScale = scaleTime({
-        domain: [startDate, endDate] as [Date, Date],
-        range: [margin.left, width - margin.right],
-    });
+  // Margins for the chart
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
 
-    const minBalance = Math.min(0, ...projections.map((d) => d.balance));
-    const maxBalance = max(projections, (d) => d.balance) || 0;
-    
-    const yScale = scaleLinear({
-        domain: [Math.max(0, minBalance), maxBalance],
-        range: [height - margin.bottom, margin.top],
-        nice: true,
-    });
-    // Calculate the tick values for the x-axis
-    const tickValues = xScale.ticks();
+  // Calculate chart dimensions
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
 
-    return (
-        <svg width={width} height={height}>
-            <Group>
-                {/* Render the line */}
-                <LinePath
-                    data={projections}
-                    x={(d) => xScale(d.date) ?? 0}
-                    y={(d) => yScale(d.balance) ?? 0}
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                />
+  // Create scales
+  const xScale = scaleTime({
+    domain: [startDate, endDate],
+    range: [0, innerWidth],
+  });
 
-                {/* Render the x-axis */}
-                <AxisBottom
-                    top={height - margin.bottom}
-                    scale={xScale}
-                    numTicks={width > 520 ? 10 : 5}
-                    tickValues={tickValues}
-                    tickFormat={(date) => moment(date).format('MMM D')}
-                    tickStroke="#8884d8"
-                    tickLabelProps={() => ({
-                        fill: '#8884d8',
-                        fontSize: 11,
-                        textAnchor: 'middle',
-                    })}
-                />
+  const maxBalance = Math.max(
+    ...projections.map((projection) => projection.balance)
+  );
+  const yScale = scaleLinear({
+    domain: [0, maxBalance],
+    range: [innerHeight, 0],
+    nice: true,
+  });
 
-                {/* Render the y-axis */}
-                <AxisLeft
-                    left={margin.left}
-                    scale={yScale}
-                    numTicks={5}
-                    tickStroke="#8884d8"
-                    tickLabelProps={() => ({
-                        fill: '#8884d8',
-                        fontSize: 11,
-                        textAnchor: 'end',
-                        dy: '0.33em',
-                    })}
-                />
-            </Group>
-        </svg>
-    );
+  const data = projections.map((projection) => ({
+    date: new Date(projection.date),
+    balance: projection.balance,
+  }));
+
+  return (
+    <svg width={width} height={height}>
+      <Group left={margin.left} top={margin.top}>
+        {/* Y-axis */}
+        <AxisLeft
+          scale={yScale}
+          tickFormat={(value) => `$${value}`}
+          stroke="#333"
+          tickStroke="#333"
+          label="Balance"
+          labelOffset={40}
+          tickLabelProps={() => ({
+            fill: "#333",
+            fontSize: 11,
+            textAnchor: "end",
+            dy: "0.33em",
+          })}
+        />
+
+        {/* X-axis */}
+        <AxisBottom
+          top={innerHeight}
+          scale={xScale}
+          stroke="#333"
+          tickStroke="#333"
+          label="Date"
+          labelOffset={15}
+          tickLabelProps={() => ({
+            fill: "#333",
+            fontSize: 11,
+            textAnchor: "middle",
+          })}
+        />
+
+        {/* Line path */}
+        <LinePath
+          data={data}
+          x={(d) => xScale(new Date(d.date))}
+          y={(d) => yScale(d.balance)}
+          stroke="#2196f3"
+          strokeWidth={2}
+        />
+      </Group>
+    </svg>
+  );
 };
 
 export default ProjectionsChart;
