@@ -105,6 +105,7 @@ const MainForm: React.FC = () => {
       endDate: new Date(),
       amount: 1000,
       orderType: "buy",
+      source: "deposit",
     };
     dispatch({ type: "ADD_PLAN", payload: newPlan });
   };
@@ -125,6 +126,12 @@ const MainForm: React.FC = () => {
         ...state.plans[index],
         [field]: updatedValue,
       };
+
+      // Reset source to undefined if orderType is changed to 'sell'
+      if (field === "orderType" && value === "sell") {
+        updatedPlan.source = undefined;
+      }
+
       dispatch({
         type: "UPDATE_PLAN",
         payload: { index, plan: updatedPlan },
@@ -195,14 +202,6 @@ const MainForm: React.FC = () => {
         <button type="submit">Submit</button>
       </div>
       <div>
-        <label htmlFor="contribution">Contribution:</label>
-        <input
-          type="text"
-          id="contribution"
-          value={state.contribution}
-          onChange={handleContributionChange}
-        />
-
         <label htmlFor="timePeriod">Time Period:</label>
         <select
           id="timePeriod"
@@ -249,6 +248,15 @@ const MainForm: React.FC = () => {
               <option value="buy">Buy</option>
               <option value="sell">Sell</option>
             </select>
+            {plan.orderType === "buy" && (
+              <select
+                value={plan.source}
+                onChange={handlePlanChange(index, "source")}
+              >
+                <option value="deposit">Deposit</option>
+                <option value="settlement">Settlement</option>
+              </select>
+            )}
             <button onClick={handleDeletePlan(index)}>Delete</button>
           </div>
         ))}

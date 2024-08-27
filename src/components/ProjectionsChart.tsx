@@ -3,11 +3,12 @@ import { Group } from "@visx/group";
 import { LinePath } from "@visx/shape";
 import { scaleTime, scaleLinear, scaleOrdinal } from "@visx/scale";
 import { AxisLeft, AxisBottom } from "@visx/axis";
+import { GridColumns } from "@visx/grid";
 import { Projection } from "../util/useProjections";
 import { useAppContext } from "../AppContext";
 import { LegendOrdinal } from "@visx/legend";
 import { localPoint } from "@visx/event";
-import { useTooltip, Tooltip, defaultStyles } from "@visx/tooltip";
+import { useTooltip, TooltipWithBounds, defaultStyles } from "@visx/tooltip";
 import { bisector } from "d3-array";
 
 interface ProjectionsChartProps {
@@ -85,7 +86,7 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     tooltipLeft = 0,
   } = useTooltip();
 
-  const bisectDate = bisector<{ date: Date }, Date>((d) => d.date).left;
+  const bisectDate = bisector<Projection, Date>((d) => d.date).left;
 
   const handleTooltip = useCallback(
     (
@@ -112,14 +113,51 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     [showTooltip, xScale, yScale, projections, margin.left]
   );
 
+  // Currency formatter
+  const currencyFormatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
+  // Simplified currency formatter for axis labels
+  const axisLabelFormatter = new Intl.NumberFormat("en-US", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
+  // Generate yearly ticks
+  const generateYearlyTicks = () => {
+    const years = [];
+    const startYear = startDate.getFullYear();
+    const endYear = finalDate.getFullYear();
+    for (let year = startYear; year <= endYear; year++) {
+      years.push(new Date(year, 0, 1)); // January 1st of each year
+    }
+    return years;
+  };
+
+  const yearlyTicks = generateYearlyTicks();
+
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <svg width={width} height={height}>
         <Group left={margin.left} top={margin.top}>
+          {/* Vertical grid lines for each year */}
+          <GridColumns
+            scale={xScale}
+            height={innerHeight}
+            tickValues={yearlyTicks}
+            stroke="#e0e0e0"
+            strokeOpacity={0.5}
+          />
+
           {/* Y-axis */}
           <AxisLeft
             scale={yScale}
-            tickFormat={(value) => `$${value}`}
+            tickFormat={(value) => `$${axisLabelFormatter.format(value)}`}
             stroke="#333"
             tickStroke="#333"
             label="Value"
@@ -140,6 +178,8 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
             tickStroke="#333"
             label="Date"
             labelOffset={15}
+            tickValues={yearlyTicks}
+            tickFormat={(date) => date.getFullYear().toString()}
             tickLabelProps={() => ({
               fill: "#333",
               fontSize: 11,
@@ -199,7 +239,8 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
 
       {/* Tooltip */}
       {tooltipData && (
-        <Tooltip
+        <TooltipWithBounds
+          key={Math.random()} // force re-render on update
           top={tooltipTop + margin.top}
           left={tooltipLeft}
           style={{
@@ -213,28 +254,31 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
         >
           <div>
             <strong>Date:</strong>{" "}
-            {(tooltipData as any).date.toLocaleDateString()}
+            {(tooltipData as Projection).date.toLocaleDateString()}
           </div>
           <div>
-            <strong>Asset Balance:</strong> $
-            {(tooltipData as any).assetBalance.toFixed(2)}
+            <strong>Asset Balance:</strong>{" "}
+            {currencyFormatter.format((tooltipData as Projection).assetBalance)}
           </div>
           <div>
-            <strong>Price:</strong> ${(tooltipData as any).price.toFixed(2)}
+            <strong>Price:</strong>{" "}
+            {currencyFormatter.format((tooltipData as Projection).price)}
           </div>
           <div>
-            <strong>Total Contributions:</strong> $
-            {(tooltipData as any).totalContributions.toFixed(2)}
+            <strong>Total Contributions:</strong>{" "}
+            {currencyFormatter.format(
+              (tooltipData as Projection).totalContributions
+            )}
           </div>
           <div>
-            <strong>Total Balance:</strong> $
-            {(tooltipData as any).totalBalance.toFixed(2)}
+            <strong>Total Balance:</strong>{" "}
+            {currencyFormatter.format((tooltipData as Projection).totalBalance)}
           </div>
           <div>
-            <strong>Settlement:</strong> $
-            {(tooltipData as any).settlement.toFixed(2)}
+            <strong>Settlement:</strong>{" "}
+            {currencyFormatter.format((tooltipData as Projection).settlement)}
           </div>
-        </Tooltip>
+        </TooltipWithBounds>
       )}
 
       {/* Legend */}

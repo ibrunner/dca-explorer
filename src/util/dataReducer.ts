@@ -10,6 +10,7 @@ export interface Plan {
   endDate: Date;
   amount: number;
   orderType: "buy" | "sell";
+  source?: "deposit" | "settlement"; // New field
 }
 
 export interface State {
@@ -192,6 +193,7 @@ const dataReducer = (state: State, action: Action) => {
             ...action.payload,
             startDate: new Date(action.payload.startDate),
             endDate: new Date(action.payload.endDate),
+            source: action.payload.orderType === "buy" ? "deposit" : undefined, // Set default source
           },
         ],
       };
@@ -204,6 +206,10 @@ const dataReducer = (state: State, action: Action) => {
                 ...action.payload.plan,
                 startDate: new Date(action.payload.plan.startDate),
                 endDate: new Date(action.payload.plan.endDate),
+                source:
+                  action.payload.plan.orderType === "buy"
+                    ? action.payload.plan.source || "deposit"
+                    : undefined,
               }
             : plan
         ),

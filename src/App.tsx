@@ -8,22 +8,48 @@ import useProjections from "./util/useProjections";
 
 function App(): JSX.Element {
   const startDateInit: Date = new Date();
-  const defaultTargetDate = new Date("2025-08-01");
-  const defaultTargetPrice = 250000;
 
   const [state, dispatch] = useReducer(dataReducer, {
-    startingAssetTotal: 1,
+    startingAssetTotal: 2,
     timePeriod: "",
     projections: [],
     startDate: startDateInit,
     targets: [
       {
+        date: new Date("2025-07-01"),
+        price: 150000,
+      },
+      {
+        date: new Date("2025-08-01"),
+        price: 250000,
+      },
+      {
+        date: new Date("2025-12-01"),
+        price: 150000,
+      },
+      {
         date: new Date("2026-08-01"),
         price: 90000,
       },
       {
-        date: defaultTargetDate,
-        price: defaultTargetPrice,
+        date: new Date("2027-08-01"),
+        price: 90000,
+      },
+      {
+        date: new Date("2028-08-01"),
+        price: 200000,
+      },
+      {
+        date: new Date("2029-08-01"),
+        price: 1000000,
+      },
+      {
+        date: new Date("2030-08-01"),
+        price: 300000,
+      },
+      {
+        date: new Date("2031-08-01"),
+        price: 200000,
       },
     ],
     startPrice: 67800,
@@ -37,7 +63,26 @@ function App(): JSX.Element {
       {
         startDate: new Date("2025-02-01"),
         endDate: new Date("2026-04-01"),
-        amount: 2000,
+        amount: 8000,
+        orderType: "sell",
+      },
+      {
+        startDate: new Date("2026-04-01"),
+        endDate: new Date("2028-04-01"),
+        amount: 1000,
+        orderType: "buy",
+      },
+      {
+        startDate: new Date("2026-04-01"),
+        endDate: new Date("2028-04-01"),
+        amount: 5000,
+        orderType: "buy",
+        source: "settlement",
+      },
+      {
+        startDate: new Date("2029-04-01"),
+        endDate: new Date("2030-04-01"),
+        amount: 60000,
         orderType: "sell",
       },
     ],

@@ -63,18 +63,34 @@ const useProjections = (
             weekDate <= moment(plan.endDate)
           ) {
             if (plan.orderType === "buy") {
-              weekContribution += plan.amount;
-              assetTotal += plan.amount / price;
+              if (plan.source === "settlement") {
+                const availableSettlement = Math.min(settlement, plan.amount);
+                settlement -= availableSettlement;
+                assetTotal += availableSettlement / price;
+              } else {
+                // deposit
+                weekContribution += plan.amount;
+                assetTotal += plan.amount / price;
+              }
             } else {
               // "sell"
-              weekSettlement += plan.amount;
-              assetTotal -= plan.amount / price;
+              const maxSellAmount = assetTotal * price;
+              const sellAmount = Math.min(plan.amount, maxSellAmount);
+              weekSettlement += sellAmount;
+              assetTotal -= sellAmount / price;
+              if (sellAmount < plan.amount) {
+                weekSettlement += plan.amount - sellAmount;
+              }
             }
           }
         });
 
         totalContributions += weekContribution;
         settlement += weekSettlement;
+
+        // Ensure assetTotal and settlement never go below 0
+        assetTotal = Math.max(0, assetTotal);
+        settlement = Math.max(0, settlement);
 
         const assetBalance = assetTotal * price;
         const totalBalance = assetBalance + settlement;
