@@ -23,7 +23,7 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
   projections,
 }) => {
   const { state } = useAppContext();
-  const { startDate, endDate } = state;
+  const { startDate } = state;
 
   // Margins for the chart
   const margin = { top: 20, right: 100, bottom: 40, left: 60 };
@@ -32,9 +32,15 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
+  // Get the final date from projections
+  const finalDate =
+    projections.length > 0
+      ? projections[projections.length - 1].date
+      : new Date(startDate);
+
   // Create scales
   const xScale = scaleTime({
-    domain: [startDate, endDate],
+    domain: [startDate, finalDate],
     range: [0, innerWidth],
   });
 

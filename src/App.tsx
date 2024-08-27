@@ -8,9 +8,6 @@ import useProjections from "./util/useProjections";
 
 function App(): JSX.Element {
   const startDateInit: Date = new Date();
-  const endDateInit: Date = new Date();
-
-  endDateInit.setFullYear(endDateInit.getFullYear() + 1);
 
   const [state, dispatch] = useReducer(dataReducer, {
     contribution: 1000,
@@ -18,25 +15,17 @@ function App(): JSX.Element {
     timePeriod: "",
     projections: [],
     startDate: startDateInit,
-    endDate: endDateInit,
+    targets: [],
     startPrice: 67800,
-    endPrice: 123000,
   });
 
-  const {
-    startPrice,
-    endPrice,
-    startDate,
-    endDate,
-    contribution,
-    startingAssetTotal,
-  } = state;
+  const { startPrice, startDate, targets, contribution, startingAssetTotal } =
+    state;
 
   const projections = useProjections(
     startPrice,
-    endPrice,
     startDate,
-    endDate,
+    targets,
     contribution,
     startingAssetTotal
   );

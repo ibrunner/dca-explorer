@@ -1,5 +1,6 @@
 import React from "react";
 import { useAppContext } from "../AppContext";
+import { Target } from "../util/dataReducer";
 
 const MainForm: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -7,9 +8,12 @@ const MainForm: React.FC = () => {
   const handleStartingAssetTotalChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    dispatch({ type: "SET_STARTING_ASSET_TOTAL", payload: Number(event.target.value) });
+    dispatch({
+      type: "SET_STARTING_ASSET_TOTAL",
+      payload: Number(event.target.value),
+    });
   };
-  
+
   const handleContributionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -28,9 +32,7 @@ const MainForm: React.FC = () => {
     dispatch({ type: "SET_START_PRICE", payload: Number(event.target.value) });
   };
 
-  const handleEndPriceChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleEndPriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "SET_END_PRICE", payload: Number(event.target.value) });
   };
 
@@ -40,23 +42,74 @@ const MainForm: React.FC = () => {
     dispatch({ type: "SET_START_DATE", payload: new Date(event.target.value) });
   };
 
-  const handleEndDateChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({ type: "SET_END_DATE", payload: new Date(event.target.value) });
+  // const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   dispatch({ type: "SET_END_DATE", payload: new Date(event.target.value) });
+  // };
+
+  const handleAddTarget = () => {
+    const newTarget: Target = (() => {
+      if (state.targets.length === 0) {
+        // If it's the first target, use startDate + 1 day and startPrice
+        const defaultDate = new Date(state.startDate);
+        defaultDate.setDate(defaultDate.getDate() + 1);
+        return {
+          date: defaultDate,
+          price: state.startPrice,
+        };
+      } else {
+        // Use the last target's date + 1 day and its price
+        const lastTarget = state.targets[state.targets.length - 1];
+        const newDate = new Date(lastTarget.date);
+        newDate.setDate(newDate.getDate() + 1);
+        return {
+          date: newDate,
+          price: lastTarget.price,
+        };
+      }
+    })();
+
+    dispatch({ type: "ADD_TARGET", payload: newTarget });
+  };
+
+  const handleTargetDateChange =
+    (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const updatedTarget: Target = {
+        ...state.targets[index],
+        date: new Date(event.target.value),
+      };
+      dispatch({
+        type: "UPDATE_TARGET",
+        payload: { index, target: updatedTarget },
+      });
+    };
+
+  const handleTargetPriceChange =
+    (index: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const updatedTarget: Target = {
+        ...state.targets[index],
+        price: Number(event.target.value),
+      };
+      dispatch({
+        type: "UPDATE_TARGET",
+        payload: { index, target: updatedTarget },
+      });
+    };
+
+  const handleDeleteTarget = (index: number) => () => {
+    dispatch({ type: "DELETE_TARGET", payload: index });
   };
 
   return (
     <>
       <div>
-      <label>
-        Starting Asset Total:
-        <input
-          type="number"
-          value={state.startingAssetTotal}
-          onChange={handleStartingAssetTotalChange}
-        />
-      </label>
+        <label>
+          Starting Asset Total:
+          <input
+            type="number"
+            value={state.startingAssetTotal}
+            onChange={handleStartingAssetTotalChange}
+          />
+        </label>
         <label>
           Start Price:
           <input
@@ -84,14 +137,24 @@ const MainForm: React.FC = () => {
           />
         </label>
         <br />
-        <label>
-          End Date:
-          <input
-            type="date"
-            value={state.endDate.toISOString().split("T")[0]}
-            onChange={handleEndDateChange}
-          />
-        </label>
+        <h3>Targets:</h3>
+        {state.targets.map((target, index) => (
+          <div key={index}>
+            <label>Target {index + 1}:</label>
+            <input
+              type="date"
+              value={target.date.toISOString().split("T")[0]}
+              onChange={handleTargetDateChange(index)}
+            />
+            <input
+              type="number"
+              value={target.price}
+              onChange={handleTargetPriceChange(index)}
+            />
+            <button onClick={handleDeleteTarget(index)}>Delete</button>
+          </div>
+        ))}
+        <button onClick={handleAddTarget}>Add Target</button>
         <br />
         <button type="submit">Submit</button>
       </div>

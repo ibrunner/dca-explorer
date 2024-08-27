@@ -1,5 +1,10 @@
 import { Projection } from "./useProjections";
 
+export interface Target {
+  date: Date;
+  price: number;
+}
+
 export interface State {
   contribution: number;
   timePeriod: string;
@@ -7,7 +12,7 @@ export interface State {
   startPrice: number;
   endPrice: number;
   startDate: Date;
-  endDate: Date;
+  targets: Target[];
   startingAssetTotal: number;
 }
 
@@ -17,11 +22,16 @@ type SetProjectionsAction = { type: "SET_PROJECTIONS"; payload: Projection[] };
 type SetStartPriceAction = { type: "SET_START_PRICE"; payload: number };
 type SetEndPriceAction = { type: "SET_END_PRICE"; payload: number };
 type SetStartDateAction = { type: "SET_START_DATE"; payload: Date };
-type SetEndDateAction = { type: "SET_END_DATE"; payload: Date };
 type SetStartingAssetTotalAction = {
   type: "SET_STARTING_ASSET_TOTAL";
   payload: number;
-}; // New action type
+};
+type AddTargetAction = { type: "ADD_TARGET"; payload: Target };
+type UpdateTargetAction = {
+  type: "UPDATE_TARGET";
+  payload: { index: number; target: Target };
+};
+type DeleteTargetAction = { type: "DELETE_TARGET"; payload: number };
 
 export type Action =
   | SetContributionAction
@@ -30,8 +40,10 @@ export type Action =
   | SetStartPriceAction
   | SetEndPriceAction
   | SetStartDateAction
-  | SetEndDateAction
-  | SetStartingAssetTotalAction;
+  | SetStartingAssetTotalAction
+  | AddTargetAction
+  | UpdateTargetAction
+  | DeleteTargetAction;
 
 // Action creators
 export const setContribution = (
@@ -68,11 +80,6 @@ export const setStartDate = (date: Date): SetStartDateAction => ({
   payload: date,
 });
 
-export const setEndDate = (date: Date): SetEndDateAction => ({
-  type: "SET_END_DATE",
-  payload: date,
-});
-
 export const setStartingAssetTotal = (
   total: number
 ): SetStartingAssetTotalAction => ({
@@ -80,7 +87,29 @@ export const setStartingAssetTotal = (
   payload: total,
 });
 
+export const addTarget = (target: Target): AddTargetAction => ({
+  type: "ADD_TARGET",
+  payload: target,
+});
+
+export const updateTarget = (
+  index: number,
+  target: Target
+): UpdateTargetAction => ({
+  type: "UPDATE_TARGET",
+  payload: { index, target },
+});
+
+export const deleteTarget = (index: number): DeleteTargetAction => ({
+  type: "DELETE_TARGET",
+  payload: index,
+});
+
 // Update the reducer
+const sortTargets = (targets: Target[]): Target[] => {
+  return targets.sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
 const dataReducer = (state: State, action: Action) => {
   switch (action.type) {
     case "SET_CONTRIBUTION":
@@ -95,10 +124,27 @@ const dataReducer = (state: State, action: Action) => {
       return { ...state, endPrice: action.payload };
     case "SET_START_DATE":
       return { ...state, startDate: action.payload };
-    case "SET_END_DATE":
-      return { ...state, endDate: action.payload };
     case "SET_STARTING_ASSET_TOTAL":
       return { ...state, startingAssetTotal: action.payload };
+    case "ADD_TARGET":
+      return {
+        ...state,
+        targets: sortTargets([...state.targets, action.payload]),
+      };
+    case "UPDATE_TARGET":
+      return {
+        ...state,
+        targets: sortTargets(
+          state.targets.map((target, index) =>
+            index === action.payload.index ? action.payload.target : target
+          )
+        ),
+      };
+    case "DELETE_TARGET":
+      return {
+        ...state,
+        targets: state.targets.filter((_, index) => index !== action.payload),
+      };
     default:
       return state;
   }

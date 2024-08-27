@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import moment from "moment";
+import { Target } from "./dataReducer";
 
 export interface Projection {
   date: Date;
@@ -13,72 +14,65 @@ export interface Projection {
 
 const useProjections = (
   startPrice: number,
-  endPrice: number,
   startDate: Date,
-  endDate: Date,
+  targets: Target[],
   contribution: number,
   startingAssetTotal: number
 ) => {
   const [projections, setProjections] = useState<Projection[]>([]);
 
   useEffect(() => {
-    const duration = moment(endDate).diff(startDate, "weeks");
-    const weeklyChange = (endPrice - startPrice) / duration;
+    if (targets.length === 0) return;
 
+    const sortedTargets = [...targets].sort(
+      (a, b) => a.date.getTime() - b.date.getTime()
+    );
     const projectionsArray: Projection[] = [];
+    let currentDate = moment(startDate);
+    let currentPrice = startPrice;
+    let totalContributions = 0;
+    let assetTotal = startingAssetTotal;
 
-    for (let i = 0; i <= duration; i++) {
-      const price = startPrice + weeklyChange * i;
-      // Calculate the asset total for each projection
-      let assetTotal: number;
+    for (let i = 0; i <= sortedTargets.length; i++) {
+      const endDate =
+        i < sortedTargets.length
+          ? moment(sortedTargets[i].date)
+          : moment(sortedTargets[sortedTargets.length - 1].date).add(1, "week");
+      const endPrice =
+        i < sortedTargets.length
+          ? sortedTargets[i].price
+          : sortedTargets[sortedTargets.length - 1].price;
 
-      if (i > 0) {
-        // If it's not the first projection, add the contribution divided by the price to the previous asset total
-        assetTotal = projectionsArray[i - 1].assetTotal + contribution / price;
-      } else {
-        if (price) {
-          // If the price is not zero, calculate the asset total using the contribution divided by the price plus the starting asset total
-          assetTotal = contribution / price + startingAssetTotal;
-        } else {
-          // If the price is zero, use the starting asset total as the asset total
-          assetTotal = startingAssetTotal;
-        }
+      const duration = endDate.diff(currentDate, "weeks");
+      const weeklyPriceChange = (endPrice - currentPrice) / duration;
+
+      for (let week = 0; week < duration; week++) {
+        const price = currentPrice + weeklyPriceChange * week;
+        totalContributions += contribution;
+        assetTotal += contribution / price;
+
+        const projection: Projection = {
+          date: currentDate.toDate(),
+          price,
+          contribution,
+          totalContributions,
+          assetOrder: contribution / price,
+          assetTotal,
+          balance: assetTotal * price,
+        };
+        projectionsArray.push(projection);
+
+        currentDate.add(1, "week");
       }
 
-      const projection: Projection = {
-        date: moment(startDate).add(i, "weeks").toDate(),
-        price,
-        contribution,
-        totalContributions: (i + 1) * contribution,
-        assetOrder: price ? contribution / price : 0,
-        assetTotal,
-        balance: assetTotal * price,
-      };
-      projectionsArray.push(projection);
+      currentDate = endDate;
+      currentPrice = endPrice;
     }
 
     setProjections(projectionsArray);
-  }, [
-    startPrice,
-    endPrice,
-    startDate,
-    endDate,
-    contribution,
-    startingAssetTotal,
-  ]);
+  }, [startPrice, startDate, targets, contribution, startingAssetTotal]);
 
-  return useMemo(
-    () => projections,
-    [
-      projections,
-      startPrice,
-      endPrice,
-      startDate,
-      endDate,
-      contribution,
-      startingAssetTotal,
-    ]
-  );
+  return projections;
 };
 
 export default useProjections;
