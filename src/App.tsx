@@ -8,26 +8,58 @@ import useProjections from "./util/useProjections";
 
 function App(): JSX.Element {
   const startDateInit: Date = new Date();
+  const defaultTargetDate = new Date("2025-08-01");
+  const defaultTargetPrice = 250000;
 
   const [state, dispatch] = useReducer(dataReducer, {
-    contribution: 1000,
     startingAssetTotal: 1,
     timePeriod: "",
     projections: [],
     startDate: startDateInit,
-    targets: [],
+    targets: [
+      {
+        date: new Date("2026-08-01"),
+        price: 90000,
+      },
+      {
+        date: defaultTargetDate,
+        price: defaultTargetPrice,
+      },
+    ],
     startPrice: 67800,
+    plans: [
+      {
+        startDate: startDateInit,
+        endDate: new Date("2025-01-01"),
+        amount: 1000,
+        orderType: "buy",
+      },
+      {
+        startDate: new Date("2025-02-01"),
+        endDate: new Date("2026-04-01"),
+        amount: 2000,
+        orderType: "sell",
+      },
+    ],
+    settlement: 0, // Initialize settlement to 0
   });
 
-  const { startPrice, startDate, targets, contribution, startingAssetTotal } =
-    state;
+  const {
+    startPrice,
+    startDate,
+    targets,
+    plans,
+    startingAssetTotal,
+    settlement,
+  } = state;
 
   const projections = useProjections(
     startPrice,
     startDate,
     targets,
-    contribution,
-    startingAssetTotal
+    plans,
+    startingAssetTotal,
+    settlement
   );
 
   return (
@@ -35,7 +67,7 @@ function App(): JSX.Element {
       <MainForm />
       <ProjectionsChart
         {...state}
-        width={500}
+        width={1000}
         height={500}
         projections={projections}
       />

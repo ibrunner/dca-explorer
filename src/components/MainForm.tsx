@@ -1,6 +1,6 @@
 import React from "react";
 import { useAppContext } from "../AppContext";
-import { Target } from "../util/dataReducer";
+import { Target, Plan } from "../util/dataReducer";
 
 const MainForm: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -99,6 +99,42 @@ const MainForm: React.FC = () => {
     dispatch({ type: "DELETE_TARGET", payload: index });
   };
 
+  const handleAddPlan = () => {
+    const newPlan: Plan = {
+      startDate: new Date(),
+      endDate: new Date(),
+      amount: 1000,
+      orderType: "buy",
+    };
+    dispatch({ type: "ADD_PLAN", payload: newPlan });
+  };
+
+  const handlePlanChange =
+    (index: number, field: keyof Plan) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = event.target.value;
+      let updatedValue: string | number | Date = value;
+
+      if (field === "startDate" || field === "endDate") {
+        updatedValue = new Date(value);
+      } else if (field === "amount") {
+        updatedValue = Number(value);
+      }
+
+      const updatedPlan: Plan = {
+        ...state.plans[index],
+        [field]: updatedValue,
+      };
+      dispatch({
+        type: "UPDATE_PLAN",
+        payload: { index, plan: updatedPlan },
+      });
+    };
+
+  const handleDeletePlan = (index: number) => () => {
+    dispatch({ type: "DELETE_PLAN", payload: index });
+  };
+
   return (
     <>
       <div>
@@ -177,6 +213,48 @@ const MainForm: React.FC = () => {
           <option value="1 week">1 week</option>
           <option value="1 month">1 month</option>
         </select>
+      </div>
+      <div>
+        <h3>Plans:</h3>
+        {state.plans.map((plan, index) => (
+          <div key={index}>
+            <label>Plan {index + 1}:</label>
+            <input
+              type="date"
+              value={
+                plan.startDate instanceof Date
+                  ? plan.startDate.toISOString().split("T")[0]
+                  : plan.startDate
+              }
+              onChange={handlePlanChange(index, "startDate")}
+            />
+            <input
+              type="date"
+              value={
+                plan.endDate instanceof Date
+                  ? plan.endDate.toISOString().split("T")[0]
+                  : plan.endDate
+              }
+              onChange={handlePlanChange(index, "endDate")}
+            />
+            <input
+              type="number"
+              value={plan.amount}
+              onChange={handlePlanChange(index, "amount")}
+            />
+            <select
+              value={plan.orderType}
+              onChange={handlePlanChange(index, "orderType")}
+            >
+              <option value="buy">Buy</option>
+              <option value="sell">Sell</option>
+            </select>
+            <button onClick={handleDeletePlan(index)}>Delete</button>
+          </div>
+        ))}
+        <button onClick={handleAddPlan}>Add Plan</button>
+        <br />
+        <button type="submit">Submit</button>
       </div>
     </>
   );

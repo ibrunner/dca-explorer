@@ -5,15 +5,22 @@ export interface Target {
   price: number;
 }
 
+export interface Plan {
+  startDate: Date;
+  endDate: Date;
+  amount: number;
+  orderType: "buy" | "sell";
+}
+
 export interface State {
-  contribution: number;
+  startingAssetTotal: number;
   timePeriod: string;
   projections: Projection[];
-  startPrice: number;
-  endPrice: number;
   startDate: Date;
   targets: Target[];
-  startingAssetTotal: number;
+  startPrice: number;
+  plans: Plan[];
+  settlement: number; // New property
 }
 
 type SetContributionAction = { type: "SET_CONTRIBUTION"; payload: string };
@@ -32,6 +39,13 @@ type UpdateTargetAction = {
   payload: { index: number; target: Target };
 };
 type DeleteTargetAction = { type: "DELETE_TARGET"; payload: number };
+type AddPlanAction = { type: "ADD_PLAN"; payload: Plan };
+type UpdatePlanAction = {
+  type: "UPDATE_PLAN";
+  payload: { index: number; plan: Plan };
+};
+type DeletePlanAction = { type: "DELETE_PLAN"; payload: number };
+type UpdateSettlementAction = { type: "UPDATE_SETTLEMENT"; payload: number };
 
 export type Action =
   | SetContributionAction
@@ -43,7 +57,11 @@ export type Action =
   | SetStartingAssetTotalAction
   | AddTargetAction
   | UpdateTargetAction
-  | DeleteTargetAction;
+  | DeleteTargetAction
+  | AddPlanAction
+  | UpdatePlanAction
+  | DeletePlanAction
+  | UpdateSettlementAction;
 
 // Action creators
 export const setContribution = (
@@ -105,6 +123,26 @@ export const deleteTarget = (index: number): DeleteTargetAction => ({
   payload: index,
 });
 
+export const addPlan = (plan: Plan): AddPlanAction => ({
+  type: "ADD_PLAN",
+  payload: plan,
+});
+
+export const updatePlan = (index: number, plan: Plan): UpdatePlanAction => ({
+  type: "UPDATE_PLAN",
+  payload: { index, plan },
+});
+
+export const deletePlan = (index: number): DeletePlanAction => ({
+  type: "DELETE_PLAN",
+  payload: index,
+});
+
+export const updateSettlement = (amount: number): UpdateSettlementAction => ({
+  type: "UPDATE_SETTLEMENT",
+  payload: amount,
+});
+
 // Update the reducer
 const sortTargets = (targets: Target[]): Target[] => {
   return targets.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -145,6 +183,38 @@ const dataReducer = (state: State, action: Action) => {
         ...state,
         targets: state.targets.filter((_, index) => index !== action.payload),
       };
+    case "ADD_PLAN":
+      return {
+        ...state,
+        plans: [
+          ...state.plans,
+          {
+            ...action.payload,
+            startDate: new Date(action.payload.startDate),
+            endDate: new Date(action.payload.endDate),
+          },
+        ],
+      };
+    case "UPDATE_PLAN":
+      return {
+        ...state,
+        plans: state.plans.map((plan, index) =>
+          index === action.payload.index
+            ? {
+                ...action.payload.plan,
+                startDate: new Date(action.payload.plan.startDate),
+                endDate: new Date(action.payload.plan.endDate),
+              }
+            : plan
+        ),
+      };
+    case "DELETE_PLAN":
+      return {
+        ...state,
+        plans: state.plans.filter((_, index) => index !== action.payload),
+      };
+    case "UPDATE_SETTLEMENT":
+      return { ...state, settlement: state.settlement + action.payload };
     default:
       return state;
   }

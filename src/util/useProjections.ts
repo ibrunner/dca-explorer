@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import moment from "moment";
-import { Target } from "./dataReducer";
+import { Target, Plan } from "./dataReducer";
 
 export interface Projection {
   date: Date;
@@ -9,15 +9,18 @@ export interface Projection {
   totalContributions: number;
   assetOrder: number;
   assetTotal: number;
-  balance: number;
+  assetBalance: number;
+  settlement: number;
+  totalBalance: number;
 }
 
 const useProjections = (
   startPrice: number,
   startDate: Date,
   targets: Target[],
-  contribution: number,
-  startingAssetTotal: number
+  plans: Plan[],
+  startingAssetTotal: number,
+  initialSettlement: number
 ) => {
   const [projections, setProjections] = useState<Projection[]>([]);
 
@@ -30,8 +33,9 @@ const useProjections = (
     const projectionsArray: Projection[] = [];
     let currentDate = moment(startDate);
     let currentPrice = startPrice;
-    let totalContributions = 0;
     let assetTotal = startingAssetTotal;
+    let totalContributions = 0;
+    let settlement = initialSettlement;
 
     for (let i = 0; i <= sortedTargets.length; i++) {
       const endDate =
@@ -48,21 +52,45 @@ const useProjections = (
 
       for (let week = 0; week < duration; week++) {
         const price = currentPrice + weeklyPriceChange * week;
-        totalContributions += contribution;
-        assetTotal += contribution / price;
+        const weekDate = moment(currentDate).add(week, "weeks");
+
+        let weekContribution = 0;
+        let weekSettlement = 0;
+
+        plans.forEach((plan) => {
+          if (
+            weekDate >= moment(plan.startDate) &&
+            weekDate <= moment(plan.endDate)
+          ) {
+            if (plan.orderType === "buy") {
+              weekContribution += plan.amount;
+              assetTotal += plan.amount / price;
+            } else {
+              // "sell"
+              weekSettlement += plan.amount;
+              assetTotal -= plan.amount / price;
+            }
+          }
+        });
+
+        totalContributions += weekContribution;
+        settlement += weekSettlement;
+
+        const assetBalance = assetTotal * price;
+        const totalBalance = assetBalance + settlement;
 
         const projection: Projection = {
-          date: currentDate.toDate(),
+          date: weekDate.toDate(),
           price,
-          contribution,
+          contribution: weekContribution,
           totalContributions,
-          assetOrder: contribution / price,
+          assetOrder: weekContribution / price,
           assetTotal,
-          balance: assetTotal * price,
+          assetBalance,
+          settlement,
+          totalBalance,
         };
         projectionsArray.push(projection);
-
-        currentDate.add(1, "week");
       }
 
       currentDate = endDate;
@@ -70,7 +98,14 @@ const useProjections = (
     }
 
     setProjections(projectionsArray);
-  }, [startPrice, startDate, targets, contribution, startingAssetTotal]);
+  }, [
+    startPrice,
+    startDate,
+    targets,
+    plans,
+    startingAssetTotal,
+    initialSettlement,
+  ]);
 
   return projections;
 };

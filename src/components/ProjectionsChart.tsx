@@ -44,13 +44,20 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     range: [0, innerWidth],
   });
 
-  const maxBalance = Math.max(...projections.map((p) => p.balance));
+  const maxAssetBalance = Math.max(...projections.map((p) => p.assetBalance));
   const maxPrice = Math.max(...projections.map((p) => p.price));
   const maxTotalContributions = Math.max(
     ...projections.map((p) => p.totalContributions)
   );
-
-  const maxYValue = Math.max(maxBalance, maxPrice, maxTotalContributions);
+  const maxTotalBalance = Math.max(...projections.map((p) => p.totalBalance));
+  const maxSettlement = Math.max(...projections.map((p) => p.settlement));
+  const maxYValue = Math.max(
+    maxAssetBalance,
+    maxPrice,
+    maxTotalContributions,
+    maxTotalBalance,
+    maxSettlement
+  );
 
   const yScale = scaleLinear({
     domain: [0, maxYValue],
@@ -58,16 +65,15 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     nice: true,
   });
 
-  const data = projections.map((projection) => ({
-    date: new Date(projection.date),
-    balance: projection.balance,
-    price: projection.price,
-    totalContributions: projection.totalContributions,
-  }));
-
   const colorScale = scaleOrdinal({
-    domain: ["Balance", "Price", "Total Contributions"],
-    range: ["#2196f3", "#4caf50", "#ff9800"],
+    domain: [
+      "Asset Balance",
+      "Price",
+      "Total Contributions",
+      "Total Balance",
+      "Settlement",
+    ],
+    range: ["#2196f3", "#4caf50", "#ff9800", "#9c27b0", "#e91e63"],
   });
 
   // Tooltip setup
@@ -87,9 +93,9 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     ) => {
       const { x } = localPoint(event) || { x: 0 };
       const x0 = xScale.invert(x - margin.left);
-      const index = bisectDate(data, x0, 1);
-      const d0 = data[index - 1];
-      const d1 = data[index];
+      const index = bisectDate(projections, x0, 1);
+      const d0 = projections[index - 1];
+      const d1 = projections[index];
       let d = d0;
       if (d1 && d1.date) {
         d =
@@ -100,10 +106,10 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
       showTooltip({
         tooltipData: d,
         tooltipLeft: x,
-        tooltipTop: yScale(d.balance),
+        tooltipTop: yScale(d.assetBalance),
       });
     },
-    [showTooltip, xScale, yScale, data, margin.left]
+    [showTooltip, xScale, yScale, projections, margin.left]
   );
 
   return (
@@ -143,24 +149,38 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
 
           {/* Line paths */}
           <LinePath
-            data={data}
+            data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.balance)}
+            y={(d) => yScale(d.assetBalance)}
             stroke="#2196f3"
             strokeWidth={2}
           />
           <LinePath
-            data={data}
+            data={projections}
             x={(d) => xScale(new Date(d.date))}
             y={(d) => yScale(d.price)}
             stroke="#4caf50"
             strokeWidth={2}
           />
           <LinePath
-            data={data}
+            data={projections}
             x={(d) => xScale(new Date(d.date))}
             y={(d) => yScale(d.totalContributions)}
             stroke="#ff9800"
+            strokeWidth={2}
+          />
+          <LinePath
+            data={projections}
+            x={(d) => xScale(new Date(d.date))}
+            y={(d) => yScale(d.totalBalance)}
+            stroke="#9c27b0"
+            strokeWidth={2}
+          />
+          <LinePath
+            data={projections}
+            x={(d) => xScale(new Date(d.date))}
+            y={(d) => yScale(d.settlement)}
+            stroke="#e91e63"
             strokeWidth={2}
           />
 
@@ -196,7 +216,8 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
             {(tooltipData as any).date.toLocaleDateString()}
           </div>
           <div>
-            <strong>Balance:</strong> ${(tooltipData as any).balance.toFixed(2)}
+            <strong>Asset Balance:</strong> $
+            {(tooltipData as any).assetBalance.toFixed(2)}
           </div>
           <div>
             <strong>Price:</strong> ${(tooltipData as any).price.toFixed(2)}
@@ -204,6 +225,14 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
           <div>
             <strong>Total Contributions:</strong> $
             {(tooltipData as any).totalContributions.toFixed(2)}
+          </div>
+          <div>
+            <strong>Total Balance:</strong> $
+            {(tooltipData as any).totalBalance.toFixed(2)}
+          </div>
+          <div>
+            <strong>Settlement:</strong> $
+            {(tooltipData as any).settlement.toFixed(2)}
           </div>
         </Tooltip>
       )}
