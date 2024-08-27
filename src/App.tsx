@@ -75,7 +75,7 @@ function App(): JSX.Element {
       {
         startDate: new Date("2026-04-01"),
         endDate: new Date("2028-04-01"),
-        amount: 1000,
+        amount: 2000,
         orderType: "buy",
       },
       {
@@ -93,7 +93,7 @@ function App(): JSX.Element {
       },
       {
         startDate: new Date("2029-04-01"),
-        endDate: new Date("2030-04-01"),
+        endDate: new Date("2031-04-01"),
         amount: 30000,
         orderType: "sell",
       },

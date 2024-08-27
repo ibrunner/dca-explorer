@@ -78,9 +78,6 @@ const useProjections = (
               const sellAmount = Math.min(plan.amount, maxSellAmount);
               weekSettlement += sellAmount;
               assetTotal -= sellAmount / price;
-              if (sellAmount < plan.amount) {
-                weekSettlement += plan.amount - sellAmount;
-              }
             }
           }
         });
