@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Group } from "@visx/group";
 import { LinePath } from "@visx/shape";
-import { scaleTime, scaleLinear, scaleOrdinal } from "@visx/scale";
+import { scaleTime, scaleLinear, scaleOrdinal, scaleLog } from "@visx/scale";
 import { AxisLeft, AxisBottom } from "@visx/axis";
 import { GridColumns } from "@visx/grid";
 import { Projection } from "../util/useProjections";
@@ -25,6 +25,7 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
 }) => {
   const { state } = useAppContext();
   const { startDate } = state;
+  const [useLogScale, setUseLogScale] = useState(false);
 
   // Margins for the chart
   const margin = { top: 20, right: 100, bottom: 40, left: 60 };
@@ -60,11 +61,16 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
     maxSettlement
   );
 
-  const yScale = scaleLinear({
-    domain: [0, maxYValue],
-    range: [innerHeight, 0],
-    nice: true,
-  });
+  const yScale = useLogScale
+    ? scaleLog({
+        domain: [1, maxYValue], // Use 1 as the minimum for log scale
+        range: [innerHeight, 0],
+      })
+    : scaleLinear({
+        domain: [0, maxYValue],
+        range: [innerHeight, 0],
+        nice: true,
+      });
 
   const colorScale = scaleOrdinal({
     domain: [
@@ -141,8 +147,15 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
 
   const yearlyTicks = generateYearlyTicks();
 
+  const toggleLogScale = () => {
+    setUseLogScale(!useLogScale);
+  };
+
   return (
     <div style={{ position: "relative" }}>
+      <button onClick={toggleLogScale}>
+        {useLogScale ? "Use Linear Scale" : "Use Log Scale"}
+      </button>
       <svg width={width} height={height}>
         <Group left={margin.left} top={margin.top}>
           {/* Vertical grid lines for each year */}
@@ -191,35 +204,35 @@ const ProjectionsChart: React.FC<ProjectionsChartProps> = ({
           <LinePath
             data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.assetBalance)}
+            y={(d) => yScale(Math.max(1, d.assetBalance))} // Use Math.max to avoid log(0)
             stroke="#2196f3"
             strokeWidth={2}
           />
           <LinePath
             data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.price)}
+            y={(d) => yScale(Math.max(1, d.price))}
             stroke="#4caf50"
             strokeWidth={2}
           />
           <LinePath
             data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.totalContributions)}
+            y={(d) => yScale(Math.max(1, d.totalContributions))}
             stroke="#ff9800"
             strokeWidth={2}
           />
           <LinePath
             data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.totalBalance)}
+            y={(d) => yScale(Math.max(1, d.totalBalance))}
             stroke="#9c27b0"
             strokeWidth={2}
           />
           <LinePath
             data={projections}
             x={(d) => xScale(new Date(d.date))}
-            y={(d) => yScale(d.settlement)}
+            y={(d) => yScale(Math.max(1, d.settlement))}
             stroke="#e91e63"
             strokeWidth={2}
           />

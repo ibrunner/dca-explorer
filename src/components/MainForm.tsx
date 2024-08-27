@@ -14,12 +14,6 @@ const MainForm: React.FC = () => {
     });
   };
 
-  const handleContributionChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({ type: "SET_CONTRIBUTION", payload: event.target.value });
-  };
-
   const handleTimePeriodChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -159,15 +153,6 @@ const MainForm: React.FC = () => {
             type="number"
             value={state.startPrice}
             onChange={handleStartPriceChange}
-          />
-        </label>
-        <br />
-        <label>
-          End Price:
-          <input
-            type="number"
-            value={state.endPrice}
-            onChange={handleEndPriceChange}
           />
         </label>
         <br />

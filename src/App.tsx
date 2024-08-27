@@ -61,9 +61,15 @@ function App(): JSX.Element {
         orderType: "buy",
       },
       {
+        startDate: new Date("2025-06-01"),
+        endDate: new Date("2026-10-01"),
+        amount: 8000,
+        orderType: "sell",
+      },
+      {
         startDate: new Date("2025-02-01"),
         endDate: new Date("2026-04-01"),
-        amount: 8000,
+        amount: 4000,
         orderType: "sell",
       },
       {
@@ -75,14 +81,20 @@ function App(): JSX.Element {
       {
         startDate: new Date("2026-04-01"),
         endDate: new Date("2028-04-01"),
-        amount: 5000,
+        amount: 10000,
         orderType: "buy",
         source: "settlement",
       },
       {
+        startDate: new Date("2029-06-01"),
+        endDate: new Date("2030-10-01"),
+        amount: 70000,
+        orderType: "sell",
+      },
+      {
         startDate: new Date("2029-04-01"),
         endDate: new Date("2030-04-01"),
-        amount: 60000,
+        amount: 30000,
         orderType: "sell",
       },
     ],
