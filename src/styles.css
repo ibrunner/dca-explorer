@@ -1,0 +1,35 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --border-color: #ccc;
+  --placeholder-color: #888;
+  --ring-color: #555;
+}
+
+[data-theme='dark'] {
+  --background-color: #1a1a1a;
+  --text-color: #e5e5e5;
+  --border-color: #333;
+  --placeholder-color: #888;
+  --ring-color: #555;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+input {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border-color: var(--border-color);
+}
+
+input::placeholder {
+  color: var(--placeholder-color);
+}
+
+input:focus-visible {
+  outline: none;
+  ring-color: var(--ring-color);
+}

@@ -1,6 +1,10 @@
 import React from "react";
 import { useAppContext } from "../AppContext";
 import { Target, Plan } from "../util/dataReducer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 
 const MainForm: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -36,14 +40,9 @@ const MainForm: React.FC = () => {
     dispatch({ type: "SET_START_DATE", payload: new Date(event.target.value) });
   };
 
-  // const handleEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   dispatch({ type: "SET_END_DATE", payload: new Date(event.target.value) });
-  // };
-
   const handleAddTarget = () => {
     const newTarget: Target = (() => {
       if (state.targets.length === 0) {
-        // If it's the first target, use startDate + 1 day and startPrice
         const defaultDate = new Date(state.startDate);
         defaultDate.setDate(defaultDate.getDate() + 1);
         return {
@@ -51,7 +50,6 @@ const MainForm: React.FC = () => {
           price: state.startPrice,
         };
       } else {
-        // Use the last target's date + 1 day and its price
         const lastTarget = state.targets[state.targets.length - 1];
         const newDate = new Date(lastTarget.date);
         newDate.setDate(newDate.getDate() + 1);
@@ -121,7 +119,6 @@ const MainForm: React.FC = () => {
         [field]: updatedValue,
       };
 
-      // Reset source to undefined if orderType is changed to 'sell'
       if (field === "orderType" && value === "sell") {
         updatedPlan.source = undefined;
       }
@@ -137,58 +134,52 @@ const MainForm: React.FC = () => {
   };
 
   return (
-    <>
-      <div>
-        <label>
-          Starting Asset Total:
-          <input
-            type="number"
-            value={state.startingAssetTotal}
-            onChange={handleStartingAssetTotalChange}
-          />
-        </label>
-        <label>
-          Start Price:
-          <input
-            type="number"
-            value={state.startPrice}
-            onChange={handleStartPriceChange}
-          />
-        </label>
-        <br />
-        <label>
-          Start Date:
-          <input
-            type="date"
-            value={state.startDate.toISOString().split("T")[0]}
-            onChange={handleStartDateChange}
-          />
-        </label>
-        <br />
-        <h3>Targets:</h3>
+    <div className="p-4 space-y-6">
+      <div className="space-y-4">
+        <Label>Starting Asset Total:</Label>
+        <Input
+          type="number"
+          value={state.startingAssetTotal}
+          onChange={handleStartingAssetTotalChange}
+        />
+        <Label>Start Price:</Label>
+        <Input
+          type="number"
+          value={state.startPrice}
+          onChange={handleStartPriceChange}
+        />
+        <Label>Start Date:</Label>
+        <Input
+          type="date"
+          value={state.startDate.toISOString().split("T")[0]}
+          onChange={handleStartDateChange}
+        />
+      </div>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Targets:</h3>
         {state.targets.map((target, index) => (
-          <div key={index}>
-            <label>Target {index + 1}:</label>
-            <input
+          <div key={index} className="space-y-2">
+            <Label>Target {index + 1}:</Label>
+            <Input
               type="date"
               value={target.date.toISOString().split("T")[0]}
               onChange={handleTargetDateChange(index)}
             />
-            <input
+            <Input
               type="number"
               value={target.price}
               onChange={handleTargetPriceChange(index)}
             />
-            <button onClick={handleDeleteTarget(index)}>Delete</button>
+            <Button variant="danger" onClick={handleDeleteTarget(index)}>
+              Delete
+            </Button>
           </div>
         ))}
-        <button onClick={handleAddTarget}>Add Target</button>
-        <br />
-        <button type="submit">Submit</button>
+        <Button onClick={handleAddTarget}>Add Target</Button>
       </div>
-      <div>
-        <label htmlFor="timePeriod">Time Period:</label>
-        <select
+      <div className="space-y-4">
+        <Label htmlFor="timePeriod">Time Period:</Label>
+        <Select
           id="timePeriod"
           value={state.timePeriod}
           onChange={handleTimePeriodChange}
@@ -196,14 +187,14 @@ const MainForm: React.FC = () => {
           <option value="1 day">1 day</option>
           <option value="1 week">1 week</option>
           <option value="1 month">1 month</option>
-        </select>
+        </Select>
       </div>
-      <div>
-        <h3>Plans:</h3>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Plans:</h3>
         {state.plans.map((plan, index) => (
-          <div key={index}>
-            <label>Plan {index + 1}:</label>
-            <input
+          <div key={index} className="space-y-2">
+            <Label>Plan {index + 1}:</Label>
+            <Input
               type="date"
               value={
                 plan.startDate instanceof Date
@@ -212,7 +203,7 @@ const MainForm: React.FC = () => {
               }
               onChange={handlePlanChange(index, "startDate")}
             />
-            <input
+            <Input
               type="date"
               value={
                 plan.endDate instanceof Date
@@ -221,35 +212,36 @@ const MainForm: React.FC = () => {
               }
               onChange={handlePlanChange(index, "endDate")}
             />
-            <input
+            <Input
               type="number"
               value={plan.amount}
               onChange={handlePlanChange(index, "amount")}
             />
-            <select
+            <Select
               value={plan.orderType}
               onChange={handlePlanChange(index, "orderType")}
             >
               <option value="buy">Buy</option>
               <option value="sell">Sell</option>
-            </select>
+            </Select>
             {plan.orderType === "buy" && (
-              <select
+              <Select
                 value={plan.source}
                 onChange={handlePlanChange(index, "source")}
               >
                 <option value="deposit">Deposit</option>
                 <option value="settlement">Settlement</option>
-              </select>
+              </Select>
             )}
-            <button onClick={handleDeletePlan(index)}>Delete</button>
+            <Button variant="danger" onClick={handleDeletePlan(index)}>
+              Delete
+            </Button>
           </div>
         ))}
-        <button onClick={handleAddPlan}>Add Plan</button>
-        <br />
-        <button type="submit">Submit</button>
+        <Button onClick={handleAddPlan}>Add Plan</Button>
       </div>
-    </>
+      <Button type="submit">Submit</Button>
+    </div>
   );
 };
 

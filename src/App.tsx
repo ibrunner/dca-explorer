@@ -5,6 +5,8 @@ import AppContext from "./AppContext";
 import ProjectionsTable from "./components/ProjectionsTable";
 import ProjectionsChart from "./components/ProjectionsChart";
 import useProjections from "./util/useProjections";
+import { ThemeProvider } from "next-themes";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function App(): JSX.Element {
   const startDateInit: Date = new Date();
@@ -120,16 +122,19 @@ function App(): JSX.Element {
   );
 
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      <MainForm />
-      <ProjectionsChart
-        {...state}
-        width={1000}
-        height={500}
-        projections={projections}
-      />
-      <ProjectionsTable {...state} projections={projections} />
-    </AppContext.Provider>
+    <ThemeProvider attribute="class">
+      <ThemeToggle />
+      <AppContext.Provider value={{ state, dispatch }}>
+        <MainForm />
+        <ProjectionsChart
+          {...state}
+          width={1000}
+          height={500}
+          projections={projections}
+        />
+        <ProjectionsTable {...state} projections={projections} />
+      </AppContext.Provider>
+    </ThemeProvider>
   );
 }
 
